@@ -1,0 +1,29 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+ENV/
+
+# Byte-compiled / optimized files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Pytest / testing cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs and databases
+*.log
+*.sqlite
+*.sqlite3
+
+# IDEs & OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Temporary outputs
+scratch/
+*.pdf

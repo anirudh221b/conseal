@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONSEAL — Post-Quantum Forensic Document Fingerprinting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #090d16;
+            --card-bg: rgba(18, 25, 41, 0.75);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.12) 0%, transparent 40%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            backdrop-filter: blur(12px);
+            background: rgba(9, 13, 22, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #fff, #9ca3af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-cyan);
+        }
+
+        nav {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem 2rem 0 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1.25rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            color: var(--text-main);
+        }
+
+        .nav-btn.active {
+            color: var(--accent-purple);
+            border-bottom-color: var(--accent-purple);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="text"], select, input[type="file"] {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--accent-purple);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-emerald {
+            background: linear-gradient(135deg, var(--accent-emerald), #059669);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+        }
+
+        .report-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            color: #e5e7eb;
+            overflow-x: auto;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-verified {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-emerald);
+            border: 1px solid var(--accent-emerald);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-group">
+            <div class="logo-icon">C</div>
+            <div class="logo-text">CONSEAL</div>
+        </div>
+        <div class="badge-group">
+            <span class="badge">ML-KEM-768</span>
+            <span class="badge">ML-DSA-65</span>
+            <span class="badge">2/3 Quorum Ledger</span>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="switchTab('identities')">Identities & PKI</button>
+        <button class="nav-btn" onclick="switchTab('sender')">Sender (Encrypt)</button>
+        <button class="nav-btn" onclick="switchTab('recipient')">Recipient (Decrypt)</button>
+        <button class="nav-btn" onclick="switchTab('investigator')">Forensic Investigator</button>
+        <button class="nav-btn" onclick="switchTab('ledger')">Ledger Monitor</button>
+    </nav>
+
+    <main>
+        <!-- TAB 1: IDENTITIES -->
+        <div id="tab-identities" class="tab-content active">
+            <div class="glass-card">
+                <div class="card-title">Register Recipient PQ Identity</div>
+                <form id="form-register-identity" onsubmit="handleRegisterIdentity(event)">
+                    <div class="form-group">
+                        <label>Recipient Name / Email</label>
+                        <input type="text" id="reg-name" placeholder="e.g. Alice Smith (Chief Counsel)" required>
+                    </div>
+                    <button type="submit" class="btn">Issue Post-Quantum Certificate</button>
+                </form>
+            </div>
+
+            <div class="glass-card">
+                <div class="card-title">Active Issued Certificates</div>
+                <div id="identities-list">Loading identities...</div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SENDER ENCRYPT -->
+        <div id="tab-sender" class="tab-content">
+            <div class="glass-card">
+                <div class="card-title">Encrypt PDF Document (ML-KEM-768 + AES-256-GCM)</div>
+                <form id="form-encrypt" onsubmit="handleEncrypt(event)">
+                    <div class="form-group">
+                        <label>Select PDF Document</label>
+                        <input type="file" id="enc-file" accept=".pdf" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Target Recipient Certificate</label>
+                        <select id="enc-recipient-select" required></select>
+                    </div>
+                    <button type="submit" class="btn">Encrypt for Recipient</button>
+                </form>
+            </div>
+
+            <div id="enc-result-card" class="glass-card" style="display: none;">
+                <div class="card-title">Encryption Result</div>
+                <div id="enc-result-details"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: RECIPIENT DECRYPT -->
+        <div id="tab-recipient" class="tab-content">
+            <div class="glass-card">
+                <div class="card-title">Decrypt & Embed Forensic Watermark</div>
+                <form id="form-decrypt" onsubmit="handleDecrypt(event)">
+                    <div class="form-group">
+                        <label>Document SHA-256 Hash</label>
+                        <input type="text" id="dec-doc-hash" placeholder="Paste document hash" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Recipient Certificate</label>
+                        <select id="dec-recipient-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Watermark Class</label>
+                        <select id="dec-watermark-type">
+                            <option value="typeB">Type B: Image/Scanned PDF (DCT Spread Spectrum)</option>
+                            <option value="typeA">Type A: Text Heavy PDF (Micro Glyph Spacing)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-emerald">Decrypt, Sign ML-DSA & Record on Ledger</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 4: FORENSIC INVESTIGATOR -->
+        <div id="tab-investigator" class="tab-content">
+            <div class="glass-card">
+                <div class="card-title">Investigate Leaked PDF Document</div>
+                <form id="form-investigate" onsubmit="handleInvestigate(event)">
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Reference Original PDF</label>
+                            <input type="file" id="inv-orig-file" accept=".pdf" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Suspect Leaked PDF</label>
+                            <input type="file" id="inv-leaked-file" accept=".pdf" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">Run Non-Blind Forensic Analysis</button>
+                </form>
+            </div>
+
+            <div id="inv-report-card" class="glass-card" style="display: none;">
+                <div class="card-title">Canonical Forensic Report</div>
+                <div id="inv-report-content" class="report-box"></div>
+            </div>
+        </div>
+
+        <!-- TAB 5: LEDGER MONITOR -->
+        <div id="tab-ledger" class="tab-content">
+            <div class="glass-card">
+                <div class="card-title">Offline Permissioned Ledger Cluster (3 Nodes)</div>
+                <div id="ledger-grid" class="grid-3">Loading ledger nodes...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API = '';
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            if (tabId === 'identities') loadIdentities();
+            if (tabId === 'sender' || tabId === 'recipient') populateRecipientDropdowns();
+            if (tabId === 'ledger') loadLedgerStatus();
+        }
+
+        async function loadIdentities() {
+            const res = await fetch(`${API}/api/identities`);
+            const data = await res.json();
+            const container = document.getElementById('identities-list');
+            
+            if (data.identities.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No identities registered yet.</p>';
+                return;
+            }
+
+            container.innerHTML = data.identities.map(i => `
+                <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>${i.recipient_id}</strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); font-family: monospace;">${i.cert_id}</div>
+                    </div>
+                    <span class="badge" style="color: var(--accent-emerald);">${i.algorithm_kem} / ${i.algorithm_dsa}</span>
+                </div>
+            `).join('');
+        }
+
+        async function populateRecipientDropdowns() {
+            const res = await fetch(`${API}/api/identities`);
+            const data = await res.json();
+            const options = data.identities.map(i => `<option value="${i.cert_id}">${i.recipient_id} (${i.cert_id})</option>`).join('');
+            
+            document.getElementById('enc-recipient-select').innerHTML = options;
+            document.getElementById('dec-recipient-select').innerHTML = options;
+        }
+
+        async function handleRegisterIdentity(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value;
+            const res = await fetch(`${API}/api/identities`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({recipient_name: name})
+            });
+            if (res.ok) {
+                document.getElementById('reg-name').value = '';
+                loadIdentities();
+            }
+        }
+
+        async function handleEncrypt(e) {
+            e.preventDefault();
+            const file = document.getElementById('enc-file').files[0];
+            const certId = document.getElementById('enc-recipient-select').value;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('recipient_cert_id', certId);
+
+            const res = await fetch(`${API}/api/encrypt`, {method: 'POST', body: formData});
+            const data = await res.json();
+            
+            if (res.ok) {
+                document.getElementById('enc-result-card').style.display = 'block';
+                document.getElementById('enc-result-details').innerHTML = `
+                    <p><strong>Document Hash:</strong> <code style="color: var(--accent-cyan);">${data.encryption_details.document_hash}</code></p>
+                    <p><strong>Recipient Cert ID:</strong> ${data.encryption_details.recipient_cert_id}</p>
+                    <p><strong>Encrypted Ciphertext Size:</strong> ${data.encryption_details.ciphertext_size} bytes</p>
+                `;
+                document.getElementById('dec-doc-hash').value = data.encryption_details.document_hash;
+            }
+        }
+
+        async function handleDecrypt(e) {
+            e.preventDefault();
+            const docHash = document.getElementById('dec-doc-hash').value;
+            const certId = document.getElementById('dec-recipient-select').value;
+            const wmType = document.getElementById('dec-watermark-type').value;
+
+            const formData = new FormData();
+            formData.append('document_hash', docHash);
+            formData.append('recipient_cert_id', certId);
+            formData.append('watermark_type', wmType);
+
+            const res = await fetch(`${API}/api/decrypt`, {method: 'POST', body: formData});
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `fingerprinted_${certId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                alert('Document decrypted, fingerprinted, and recorded on 3-node ledger quorum!');
+            } else {
+                const err = await res.json();
+                alert(`Decryption Error: ${err.detail}`);
+            }
+        }
+
+        async function handleInvestigate(e) {
+            e.preventDefault();
+            const origFile = document.getElementById('inv-orig-file').files[0];
+            const leakedFile = document.getElementById('inv-leaked-file').files[0];
+
+            const formData = new FormData();
+            formData.append('original_pdf', origFile);
+            formData.append('leaked_pdf', leakedFile);
+
+            const res = await fetch(`${API}/api/investigate`, {method: 'POST', body: formData});
+            const data = await res.json();
+
+            document.getElementById('inv-report-card').style.display = 'block';
+            document.getElementById('inv-report-content').textContent = data.report_text;
+        }
+
+        async function loadLedgerStatus() {
+            const res = await fetch(`${API}/api/ledger`);
+            const data = await res.json();
+            const container = document.getElementById('ledger-grid');
+
+            container.innerHTML = data.nodes.map(n => `
+                <div class="glass-card" style="padding: 1rem;">
+                    <div style="font-weight: 700; color: var(--accent-purple); margin-bottom: 0.5rem;">${n.node_id}</div>
+                    <div style="font-size: 0.85rem;">Chain Length: ${n.chain_length} blocks</div>
+                    <div style="font-size: 0.85rem;">Integrity: <span style="color: var(--accent-emerald); font-weight: 600;">VALID</span></div>
+                    <div style="font-size: 0.75rem; font-family: monospace; color: var(--text-muted); margin-top: 0.5rem; word-break: break-all;">
+                        Hash: ${n.latest_block.block_hash.substring(0, 16)}...
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize default view
+        loadIdentities();
+    </script>
+</body>
+</html>
